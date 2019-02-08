@@ -5,8 +5,8 @@ It is a very basic starting point for programming the NES.
 
 There is also a version of this example available to build an FDS disk image for the Famicom Disk System.
 
-NES: https://github.com/bbbradsmith/NES-ca65-example
-FDS: https://github.com/bbbradsmith/NES-ca65-example/tree/fds
+* NES: https://github.com/bbbradsmith/NES-ca65-example
+* FDS: https://github.com/bbbradsmith/NES-ca65-example/tree/fds
 
 This depends on the CC65 toolchain, though it only uses the ca65 assembler, not the C compiler:
 https://cc65.github.io/
