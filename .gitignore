@@ -1,0 +1,9 @@
+cc65/
+example.o
+example.map.txt
+example.labels.txt
+example.fds.ram.nl
+example.fds.0.nl
+example.fds.1.nl
+example.fds.dbg
+example.fds.deb

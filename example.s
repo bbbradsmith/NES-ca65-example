@@ -1,6 +1,7 @@
 ;
 ; example.s
 ; Brad Smith (rainwarrior), 4/06/2014
+; Modified for FDS 5/02/2017
 ; http://rainwarrior.ca
 ;
 ; This is intended as an introductory example to NES programming with ca65.
@@ -38,36 +39,165 @@
 ;
 
 ;
-; iNES header
+; FDS headers and stuff
 ;
+
+BYPASS   = 1    ; bypass the license screen
+WIPE_RAM = 1    ; wipes unused portion of FDS RAM at startup
+
+; setting the file count 1 higher than files on disk for the license "bypass" technique
+FILE_COUNT = 5 + BYPASS
 
 .segment "HEADER"
+.byte 'F','D','S',$1A
+.byte 1 ; side count
 
-INES_MAPPER = 0 ; 0 = NROM
-INES_MIRROR = 1 ; 0 = horizontal mirroring, 1 = vertical mirroring
-INES_SRAM   = 0 ; 1 = battery backed SRAM at $6000-7FFF
+.segment "SIDE1A"
+; block 1
+.byte $01
+.byte "*NINTENDO-HVC*"
+.byte $00 ; manufacturer
+.byte "EXA"
+.byte $20 ; normal disk
+.byte $00 ; game version
+.byte $00 ; side
+.byte $00 ; disk
+.byte $00 ; disk type
+.byte $00 ; unknown
+.byte FILE_COUNT ; boot file count
+.byte $FF,$FF,$FF,$FF,$FF
+.byte $92 ; 2017
+.byte $04 ; april
+.byte $17 ; 17
+.byte $49 ; country
+.byte $61, $00, $00, $02, $00, $00, $00, $00, $00 ; unknown
+.byte $92 ; 2017
+.byte $04 ; april
+.byte $17 ; 17
+.byte $00, $80 ; unknown
+.byte $00, $00 ; disk writer serial number
+.byte $07 ; unknown
+.byte $00 ; disk write count
+.byte $00 ; actual disk side
+.byte $00 ; unknown
+.byte $00 ; price
+; block 2
+.byte $02
+.byte FILE_COUNT
 
-.byte 'N', 'E', 'S', $1A ; ID
-.byte $02 ; 16k PRG chunk count
-.byte $01 ; 8k CHR chunk count
-.byte INES_MIRROR | (INES_SRAM << 1) | ((INES_MAPPER & $f) << 4)
-.byte (INES_MAPPER & %11110000)
-.byte $0, $0, $0, $0, $0, $0, $0, $0 ; padding
+.segment "FILE0_HDR"
+; block 3
+.import __FILE0_DAT_RUN__
+.import __FILE0_DAT_SIZE__
+.byte $03
+.byte 0,0
+.byte "FILE0..."
+.word __FILE0_DAT_RUN__
+.word __FILE0_DAT_SIZE__
+.byte 0 ; PRG
+; block 4
+.byte $04
+;.segment "FILE0_DAT"
+;.incbin "" ; this is code below
 
-;
-; CHR ROM
-;
+.segment "FILE1_HDR"
+; block 3
+.import __FILE1_DAT_RUN__
+.import __FILE1_DAT_SIZE__
+.byte $03
+.byte 1,1
+.byte "FILE1..."
+.word __FILE1_DAT_RUN__
+.word __FILE1_DAT_SIZE__
+.byte 0 ; PRG
+; block 4
+.byte $04
+;.segment "FILE1_DAT"
+;.incbin "" ; this is code below
 
-.segment "TILES"
+.segment "FILE2_HDR"
+; block 3
+.import __FILE2_DAT_SIZE__
+.import __FILE2_DAT_RUN__
+.byte $03
+.byte 2,2
+.byte "FILE2..."
+.word __FILE2_DAT_RUN__
+.word __FILE2_DAT_SIZE__
+.byte 1 ; CHR
+; block 4
+.byte $04
+.segment "FILE2_DAT"
 .incbin "background.chr"
+
+.segment "FILE3_HDR"
+; block 3
+.import __FILE3_DAT_SIZE__
+.import __FILE3_DAT_RUN__
+.byte $03
+.byte 3,3
+.byte "FILE3..."
+.word __FILE3_DAT_RUN__
+.word __FILE3_DAT_SIZE__
+.byte 1 ; CHR
+; block 4
+.byte $04
+.segment "FILE3_DAT"
 .incbin "sprite.chr"
 
+.if (BYPASS <> 0)
+; This block is the last to load, and enables NMI by "loading" the NMI enable value
+; directly into the PPU control register at $2000.
+; While the disk loader continues searching for one more boot file,
+; eventually an NMI fires, allowing us to take control of the CPU before the
+; license screen is displayed.
+.segment "FILE4_HDR"
+; block 3
+.import __FILE4_DAT_SIZE__
+.import __FILE4_DAT_RUN__
+.byte $03
+.byte 4,4
+.byte "FILE4..."
+.word $2000
+.word __FILE4_DAT_SIZE__
+.byte 0 ; PRG (CPU:$2000)
+; block 4
+.byte $04
+.segment "FILE4_DAT"
+.byte $90 ; enable NMI byte sent to $2000
+
+.else
+; Alternative to the license screen bypass, just put the required copyright message at PPU:$2800.
+.segment "FILE4_HDR"
+; block 3
+.import __FILE4_DAT_SIZE__
+.import __FILE4_DAT_RUN__
+.byte $03
+.byte 4,4
+.byte "KYODAKU-"
+.word $2800
+.word __FILE4_DAT_SIZE__
+.byte 2 ; nametable (PPU:$2800)
+; block 4
+.byte $04
+.segment "FILE4_DAT"
+.incbin "check.bin"
+.endif
+
 ;
-; vectors placed at top 6 bytes of memory area
+; FDS vectors
 ;
 
-.segment "VECTORS"
+.segment "FILE1_DAT"
 .word nmi
+.word nmi
+
+.if (BYPASS <> 0)
+	.word bypass
+.else
+	.word nmi
+.endif
+
 .word reset
 .word irq
 
@@ -75,8 +205,41 @@ INES_SRAM   = 0 ; 1 = battery backed SRAM at $6000-7FFF
 ; reset routine
 ;
 
-.segment "CODE"
+.segment "FILE0_DAT"
+
+.if (BYPASS <> 0)
+; this routine is entered by interrupting the last boot file load
+; by forcing an NMI not expected by the BIOS, allowing the license
+; screen to be skipped entirely.
+;
+; The last file writes $90 to $2000, enabling NMI during the file load.
+; The "extra" file in the FILE_COUNT causes the disk to keep seeking
+; past the last file, giving enough delay for an NMI to fire and interrupt
+; the process.
+bypass:
+	; disable NMI
+	lda #0
+	sta $2000
+	; replace NMI 3 "bypass" vector at $DFFA
+	lda #<nmi
+	sta $DFFA
+	lda #>nmi
+	sta $DFFB
+	; tell the FDS reset routine that the BIOS initialized correctly
+	lda #$35
+	sta $0102
+	lda #$AC
+	sta $0103
+	; reset the FDS to begin our program properly
+	jmp ($FFFC)
+.endif
+
 reset:
+	; set FDS to use vertical mirroring
+	lda $FA
+	and #%11110111
+	sta $4025
+	;
 	sei       ; mask interrupts
 	lda #0
 	sta $2000 ; disable NMI
@@ -93,12 +256,12 @@ reset:
 	:
 		bit $2002
 		bpl :-
-	; clear all RAM to 0
+	; clear not-quite all RAM to 0
 	lda #0
-	ldx #0
+	tax
 	:
-		sta $0000, X
-		sta $0100, X
+		;sta $0000, X ; the FDS uses part of the stack and ZP,
+		;sta $0100, X ; so only partially clearing them.
 		sta $0200, X
 		sta $0300, X
 		sta $0400, X
@@ -107,16 +270,54 @@ reset:
 		sta $0700, X
 		inx
 		bne :-
+	;ldx #$00
+	:
+		sta $00, X
+		inx
+		cpx #$F9 ; $F9-FF used by FDS BIOS
+		bcc :-
+	ldx #$04 ; $0100-$0103 used by FDS BIOS
+	:
+		sta $100, X
+		inx
+		bne :-
 	; place all sprites offscreen at Y=255
 	lda #255
-	ldx #0
+	;ldx #0
 	:
 		sta oam, X
 		inx
-		inx
-		inx
-		inx
 		bne :-
+	; wipe unused portion of FDS RAM (between FILE0 and FILE1)
+	.if (WIPE_RAM <> 0)
+		WIPE_ADDR = __FILE0_DAT_RUN__ + __FILE0_DAT_SIZE__
+		WIPE_SIZE = __FILE1_DAT_RUN__ - WIPE_ADDR
+		lda #<WIPE_ADDR
+		sta $00
+		lda #>WIPE_ADDR
+		sta $01
+		lda #0
+		tay
+		ldx #>WIPE_SIZE
+		beq :++
+		: ; 256 byte blocks
+			sta ($00), Y
+			iny
+			bne :-
+			inc $01
+			dex
+			bne :-
+		: ; leftover
+		ldy #<WIPE_SIZE
+		beq :++
+		:
+			dey
+			sta ($00), Y
+			bne :-
+		:
+		sta $00
+		sta $01
+	.endif
 	; wait for second vblank
 	:
 		bit $2002
@@ -148,7 +349,7 @@ palette:    .res 32  ; palette buffer for PPU update
 .segment "OAM"
 oam: .res 256        ; sprite OAM data to be uploaded by DMA
 
-.segment "CODE"
+.segment "FILE0_DAT"
 nmi:
 	; save registers
 	pha
@@ -248,7 +449,7 @@ nmi:
 ; irq
 ;
 
-.segment "CODE"
+.segment "FILE0_DAT"
 irq:
 	rti
 
@@ -256,7 +457,7 @@ irq:
 ; drawing utilities
 ;
 
-.segment "CODE"
+.segment "FILE0_DAT"
 
 ; ppu_update: waits until next NMI, turns rendering on (if not already), uploads OAM, palette, and nametable update to PPU
 ppu_update:
@@ -374,7 +575,7 @@ PAD_R      = $80
 .segment "ZEROPAGE"
 gamepad: .res 1
 
-.segment "CODE"
+.segment "FILE0_DAT"
 ; gamepad_poll: this reads the gamepad state into the variable labelled "gamepad"
 ;   This only reads the first gamepad, and also if DPCM samples are played they can
 ;   conflict with gamepad reading, which may give incorrect results.
@@ -404,7 +605,7 @@ gamepad_poll:
 ; main
 ;
 
-.segment "RODATA"
+.segment "FILE0_DAT"
 example_palette:
 .byte $0F,$15,$26,$37 ; bg0 purple/pink
 .byte $0F,$09,$19,$29 ; bg1 green
@@ -421,7 +622,7 @@ cursor_y: .res 1
 temp_x:   .res 1
 temp_y:   .res 1
 
-.segment "CODE"
+.segment "FILE0_DAT"
 main:
 	; setup 
 	ldx #0
