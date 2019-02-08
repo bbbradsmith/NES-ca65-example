@@ -1,0 +1,24 @@
+Open "example.s" and read the comments for information about this program.
+
+To build, run "compile_example.bat", which should produce "example.nes".
+
+You will need cc65. You can download it from: http://www.cc65.org/
+Place cc65 into a folder called "cc65" within the folder with this example.
+The cc65 binaries should be in: cc65/bin/
+
+An optional Python 3 program to build debugging symbols for FCEUX is included.
+Python 3 can be downloaded at: https://www.python.org/
+
+I recommend FCEUX for debugging.
+FCEUX can be downloaded at: http://www.fceux.com/
+
+The .dbg file produced by the linker will also provide debug symbols for
+Mesen, NintendulatorDX and NESICIDE.
+
+example.nesproject is included for building with NESICIDE.
+
+
+I hope you find this example helpful!
+
+Brad Smith (rainwarrior)
+http://rainwarrior.ca
