@@ -5,6 +5,7 @@
 @del example.nes.ram.nl
 @del example.nes.0.nl
 @del example.nes.1.nl
+@del example.nes.dbg
 @echo.
 @echo Compiling...
 cc65\bin\ca65 example.s -g -o example.o
