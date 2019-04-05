@@ -12,6 +12,8 @@ This depends on the CC65 toolchain, though it only uses the ca65 assembler, not 
 
 https://cc65.github.io/
 
+To install cc65 on Mac OS using Homebrew run `brew install cc65`.
+
 See example.txt for more details.
 
 This project was originally distributed at the NESDev forums:

@@ -1,6 +1,7 @@
 Open "example.s" and read the comments for information about this program.
 
-To build, run "compile_example.bat", which should produce "example.nes".
+To build, run "compile_example.bat" (Windows) or "compile_example.sh"
+(Unix-like), which should produce "example.nes".
 
 You will need cc65. You can download it from: http://www.cc65.org/
 Place cc65 into a folder called "cc65" within the folder with this example.
