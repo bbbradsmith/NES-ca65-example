@@ -9,13 +9,13 @@ The cc65 binaries should be in: cc65/bin/
 An optional Python 3 program to build debugging symbols for FCEUX is included.
 Python 3 can be downloaded at: https://www.python.org/
 
-I recommend FCEUX for debugging.
-FCEUX can be downloaded at: http://www.fceux.com/
+I recommend FCEUX or Mesen for debugging.
+
+FCEUX: http://www.fceux.com/
+Mesen: https://www.mesen.ca/
 
 The .dbg file produced by the linker will also provide debug symbols for
-Mesen, NintendulatorDX and NESICIDE.
-
-example.nesproject is included for building with NESICIDE.
+Mesen, NintendulatorDX and NESICIDE, with no need for the python processing step.
 
 
 I hope you find this example helpful!
