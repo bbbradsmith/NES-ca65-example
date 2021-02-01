@@ -8,7 +8,7 @@ There is also a version of this example available to build an FDS disk image for
 * NES: https://github.com/bbbradsmith/NES-ca65-example
 * FDS: https://github.com/bbbradsmith/NES-ca65-example/tree/fds
 
-This depends on the CC65 toolchain, though it only uses the ca65 assembler, not the C compiler:
+This depends on the CC65 toolchain, though it only uses the ca65 assembler, not the C compiler. Download the "snapshot" here:
 
 https://cc65.github.io/
 
