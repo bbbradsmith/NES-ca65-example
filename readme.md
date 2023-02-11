@@ -30,6 +30,8 @@ Unix users that have gnu make installed can build just by running the following 
 
 ```make nl    ```    # Runs python script to generate nl files for fceux.
 
+```make test  ```    # Runs built game in emulator (fceux)
+
 The Makefile assumes that the ca65 assembler and the ld65 linker executables are in the shell's execution $PATH.
 If these programs are not acessible via $PATH, then edit the Makefile to give the proper path to these files.
 
