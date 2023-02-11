@@ -3,6 +3,7 @@ GAME=example
 ASSEMBLER=ca65
 LINKER=ld65
 PYTHON=python3
+EMULATOR=fceux
 
 OBJ_FILES=example.o
 
@@ -13,6 +14,9 @@ $(GAME).nes : $(OBJ_FILES)  $(GAME).cfg
 
 clean:
 	rm -f *.o *.nes *.dbg *.nl *.map.txt *.labels.txt
+
+test: $(GAME).nes
+	$(EMULATOR) $(GAME).nes
 
 nl: $(GAME).nes
 	$(PYTHON) $(GAME)_fceux_symbols.py
