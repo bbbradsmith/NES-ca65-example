@@ -12,7 +12,7 @@ This depends on the CC65 toolchain, though it only uses the ca65 assembler, not 
 
 https://cc65.github.io/
 
-To install cc65 on Mac OS using Homebrew run `brew install cc65`.
+To install cc65 on Mac OS using [Homebrew](https://brew.sh/) run `brew install cc65`.
 
 See example.txt for more details.
 
@@ -20,20 +20,20 @@ This project was originally distributed at the NESDev forums:
 
 https://forums.nesdev.com/viewtopic.php?t=11151
 
-Unix users that have gnu make installed can build just by running the following commands:
+Unix users can use the provided bash script, or if make is available the Makefile can be used.
 
-```make       ```    # Builds project - incremental build
+```
+compile_example.sh   # Bash script to build project
+make                 # Builds project - incremental build
+make -B              # Builds project - full build
+make clean           # Cleans (deletes) build output
+make nl              # Runs python script to generate nl files for fceux.
+make test            # Runs built game in emulator (fceux)
+```
 
-```make -B    ```    # Builds project - full build
-
-```make clean ```    # Cleans (deletes) build output
-
-```make nl    ```    # Runs python script to generate nl files for fceux.
-
-```make test  ```    # Runs built game in emulator (fceux)
-
-The Makefile assumes that the ca65 assembler and the ld65 linker executables are in the shell's execution $PATH.
-If these programs are not acessible via $PATH, then edit the Makefile to give the proper path to these files.
+Unlike the Windows example, this script and makefile assume the cc65 tools are installed globally,
+or otherwise available on the current search paths. If needed, you can edit them or provide
+environment variables to select a different location.
 
 ## License
 This program and source code can be freely redistributed, modified or reused in any way.

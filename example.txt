@@ -2,10 +2,20 @@ Open "example.s" and read the comments for information about this program.
 
 To build, run "compile_example.bat" (Windows) or "compile_example.sh"
 (Unix-like), which should produce "example.nes".
+If the make utility is available, you can run "make" with the included Makefile.
 
-You will need cc65. You can download it from: http://www.cc65.org/
-Place cc65 into a folder called "cc65" within the folder with this example.
+You will need cc65. It is available from many package managers,
+or otherwise you could download the source and build it for yourself.
+On MacOS it's avaiable using Homebrew.
+
+You can download it from: http://www.cc65.org/
+
+For the windows version, the batch file expects cc65 to be placed into a
+folder called "cc65" within the folder containing this example.
 The cc65 binaries should be in: cc65/bin/
+
+The bash script and Makefile instead expect cc65 to be on your global path,
+but you can customize the script or your environment variables to change this location.
 
 An optional Python 3 program to build debugging symbols for FCEUX is included.
 Python 3 can be downloaded at: https://www.python.org/
