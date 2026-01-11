@@ -18,7 +18,7 @@ See example.txt for more details.
 
 This project was originally distributed at the NESDev forums:
 
-https://forums.nesdev.com/viewtopic.php?t=11151
+https://forums.nesdev.org/viewtopic.php?t=11151
 
 Unix users can use the provided bash script, or if make is available the Makefile can be used.
 
