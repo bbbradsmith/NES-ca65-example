@@ -16,7 +16,7 @@ See example.txt for more details.
 
 This project was originally distributed at the NESDev forums:
 
-https://forums.nesdev.com/viewtopic.php?t=11151
+https://forums.nesdev.org/viewtopic.php?t=11151
 
 For instructions building this example on Unix-like systems or MacOS, see:
 * Unix: https://github.com/bbbradsmith/NES-ca65-example/tree/unix
